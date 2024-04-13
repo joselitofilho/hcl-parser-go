@@ -26,6 +26,13 @@ func TestParseTerraformFiles(t *testing.T) {
 			want: Config{},
 		},
 		{
+			name: "function.tf",
+			args: args{
+				files: []string{"testdata/function/function.tf"},
+			},
+			want: Config{},
+		},
+		{
 			name: "lambda as module",
 			args: args{
 				files: []string{"testdata/lambda/lambdaAsModule.tf"},
@@ -36,6 +43,13 @@ func TestParseTerraformFiles(t *testing.T) {
 			name: "lambda as resource",
 			args: args{
 				files: []string{"testdata/lambda/lambdaAsResource.tf"},
+			},
+			want: Config{},
+		},
+		{
+			name: "pubsub.tf",
+			args: args{
+				files: []string{"testdata/pubsub/pubsub.tf"},
 			},
 			want: Config{},
 		},
@@ -55,6 +69,7 @@ func TestParseTerraformFiles(t *testing.T) {
 			_, err := Parse(tc.args.directories, tc.args.files)
 
 			require.ErrorIs(t, err, tc.targetErr)
+			// require.Equal(t, tc.want, got)
 		})
 	}
 }

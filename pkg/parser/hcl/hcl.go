@@ -171,37 +171,23 @@ func parseResource(block *hclsyntax.Block) *Resource {
 	}
 
 	for _, bodyBlock := range block.Body.Blocks {
-		parseResourcesFromEnvironment(bodyBlock, resource)
+		parseResourcesFromBlock(bodyBlock, resource)
 	}
 
 	return resource
 }
 
-// parseResourcesFromEnvironment extracts environment configuration from a block.
-func parseResourcesFromEnvironment(bodyBlock *hclsyntax.Block, resource *Resource) {
-	if bodyBlock.Type == "environment" {
-		if _, ok := resource.Attributes["environment"]; !ok {
-			resource.Attributes["environment"] = map[string]map[string]any{}
-		}
+// parseResourcesFromBlock extracts environment configuration from a block.
+func parseResourcesFromBlock(bodyBlock *hclsyntax.Block, resource *Resource) {
+	blType := bodyBlock.Type
+	if _, ok := resource.Attributes[blType]; !ok {
+		resource.Attributes[blType] = map[string]any{}
+	}
 
-		environment := resource.Attributes["environment"].(map[string]map[string]any)
+	data := resource.Attributes[blType].(map[string]any)
 
-		for _, attribute := range bodyBlock.Body.Attributes {
-			value := evaluateExpression(attribute.Expr)
-
-			if _, ok := environment[attribute.Name]; !ok {
-				environment[attribute.Name] = map[string]any{}
-			}
-
-			switch value := value.(type) {
-			case map[string]any:
-				for k, v := range value {
-					environment[attribute.Name][k] = v
-				}
-			default:
-				fmtcolor.Yellow.Println("environment.variable is not a map:", bodyBlock)
-			}
-		}
+	for _, attribute := range bodyBlock.Body.Attributes {
+		data[attribute.Name] = evaluateExpression(attribute.Expr)
 	}
 }
 
